@@ -11,19 +11,6 @@ namespace
         Action actions[] = {&Cell::die, &Cell::live};
         (cell.*actions[isAlive])();
     }
-
-    typedef void(*Visit)(int rows, int columns);
-
-    void visitAllCells(Visit visit, int rows, int columns)
-    {
-        for(int i = 0; i < rows * columns; ++i)
-        {
-            int row = i / rows;
-            int column = i % columns;
-
-            visit(row, column);
-        }
-    }
 }
 
 DEFINE_ROLE(Universal::CellVisitor)
@@ -35,8 +22,9 @@ Universal::Universal(const int* initCells, int rows, int columns) : rows(rows), 
 {
     for(int i = 0; i < rows * columns; ++i)
     {
-        int row = i / rows;
+        int row = i / columns;
         int column = i % columns;
+
         initCell(at(row, column), initCells[i] == 1);
     }
 }
@@ -44,6 +32,16 @@ Universal::Universal(const int* initCells, int rows, int columns) : rows(rows), 
 Universal::~Universal()
 {
     destroyCells();
+}
+
+int Universal::row(int i) const
+{
+	return i/columns;
+}
+
+int Universal::column(int i) const
+{
+	return i%columns;
 }
 
 bool Universal::isOutOfBound(int row, int column) const
@@ -58,9 +56,7 @@ bool Universal::operator==(const Universal& rhs) const
 
     for(int i= 0; i < rows * columns; ++i)
     {
-        int row = i / rows;
-        int column = i % columns;
-        sum += counter[at(row, column).status()  !=  rhs.at(row, column).status()];
+        sum += counter[at(row(i), column(i)).status()  !=  rhs.at(row(i), column(i)).status()];
     }
 
     return sum == 0;
@@ -68,8 +64,9 @@ bool Universal::operator==(const Universal& rhs) const
 
 Cell& Universal::at(int row, int column) const
 {
+
     static Cell NullCell;
-    Cell* cell[] = {&cells[row * rows + column], &NullCell};
+    Cell* cell[] = {&cells[row * columns + column], &NullCell};
 
     return *cell[isOutOfBound(row, column)];
 }
@@ -88,10 +85,7 @@ void Universal::visitUniversal(CellVisitor& visitor) const
 {
     for(int i= 0; i < rows * columns; ++i)
     {
-        int row = i / rows;
-        int column = i % columns;
-        
-        visitor.visit(at(row, column), row, column);
+        visitor.visit(at(row(i), column(i)), row(i), column(i));
     }
 }
 
@@ -99,25 +93,22 @@ void Universal::print(char aliveSymbol, char deadSymbol) const
 {
     for(int i= 0; i < rows * columns; ++i)
     {
-        int row = i / rows;
-        int column = i % columns;
-
         char symbols[] = { deadSymbol, aliveSymbol };
         char separator[] = {' ', '\n'};
-        std::cout << symbols[at(row, column).status()] << separator[column == columns -1];
+        std::cout << symbols[at(row(i), column(i)).status()] << separator[column(i) == columns -1];
     }
 }
 
  int Universal::countAliveNeighboursAt(int row, int column) const
  {
-        return (  at(row - 1, column - 1).status()
-                        + at(row - 1, column).status()
-                        + at(row - 1, column + 1).status()
-                        + at(row, column - 1).status()
-                        + at(row, column + 1).status()
-                        + at(row + 1, column - 1).status()
-                        + at(row + 1, column).status()
-                        + at(row + 1, column + 1).status());
+        return ( at(row - 1, column - 1).status()
+        	   + at(row - 1, column).status()
+               + at(row - 1, column + 1).status()
+               + at(row, column - 1).status()
+               + at(row, column + 1).status()
+               + at(row + 1, column - 1).status()
+               + at(row + 1, column).status()
+               + at(row + 1, column + 1).status());
  }
 
 void Universal::evolve()

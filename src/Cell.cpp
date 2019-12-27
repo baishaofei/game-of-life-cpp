@@ -92,6 +92,6 @@ void Cell::createNextGeneration()
 {
     typedef void (Cell::CellState::*StateChangeFun)(Cell& cell) const;
     StateChangeFun process[] = { &Cell::CellState::remain
-                                                            ,  &Cell::CellState::transition};
+                               , &Cell::CellState::transition};
     (state->*process[isStateChanged])(*this);                                           
 }

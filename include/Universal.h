@@ -27,6 +27,10 @@ private:
     void visitUniversal(CellVisitor&) const;
 
 private:
+    int row(int i) const;
+    int column(int i) const;
+
+private:
     int rows;
     int columns;
     Cell* cells;

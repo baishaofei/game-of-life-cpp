@@ -160,8 +160,6 @@ TEST(UniversalTest, should_given_cells_equals_expect_cells_given_more_than_three
     ASSERT_UNIVERSAL_EQ(GIVEN_CELLS,  EXPECT_CELLS);
 }
 
-
-
 TEST(UniversalTest, should_given_cells_equals_expect_cells_given_a_20_rows_and_20_column_cells)
 {
     int GIVEN_CELLS[20 * 20] = 
